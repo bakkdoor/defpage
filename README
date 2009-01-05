@@ -1,0 +1,9 @@
+((defpage))
+
+defpage aims to be a small but useful web-development library (or even framework?) for Common Lisp  using the Hunchentoot webserver.
+It is heavily based upon / inspired by the LispCast.com Reddit Screencast Series. Much credit must go to it's author, Eric Normand.
+Check out http://www.lispcast.com for more information.
+
+((LICENSE))
+
+defpage is licensed under the terms of the GNU GPL v3. I still have to talk to Eric about this decision, so up to his confirmation, this project is in a somewhat weird state, since his code was freely available on the website. Although I have made several changes and additions to it, it's still mainly his work. Check again soon for an update on the licensing topic.

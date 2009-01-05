@@ -8,7 +8,7 @@
 
 
 (defvar *current-dir*
-  "/home/bakkdoor/projekte/lisp/defpage/")
+  "/Users/bakkdoor/projekte/lisp/defpage/")
 
 ;; compiles and loads a lisp source file.
 (defun compile-and-load (filename &optional &key (dir nil))
@@ -23,7 +23,7 @@
 ;; takes ny list of symbols and returns them as a list,
 ;; each converted as a string 
 (defmacro as-string-list (&rest filenames)
-    `(list ,@(loop for f in filenames collecting `(string-downcase (string ',f)))))
+  `(list ,@(loop for f in filenames collecting `,(string-downcase f))))
 
 
 ;; define files to load & compile
