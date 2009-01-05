@@ -1,3 +1,7 @@
+;; you can use this file to load & compile all files if you don't want to use asdf for doing this.
+;; you probably should use asdf though, since it is easier to handle, i guess.
+
+
 (in-package :cl-user)
 
 (require 'hunchentoot)
@@ -19,7 +23,7 @@
       (compile-file filepath)
       (load filepath))))
 
-
+ 
 ;; takes ny list of symbols and returns them as a list,
 ;; each converted as a string 
 (defmacro as-string-list (&rest filenames)

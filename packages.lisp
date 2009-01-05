@@ -39,4 +39,17 @@
   (:use :common-lisp
 	:defpage.server
 	:defpage.view
-	:defpage.generic))
+	:defpage.generic)
+  (:export :handler
+	   :server-port
+	   :set-server-port
+	   :start-server
+	   :gethandler
+	   :page-url
+	   :with-parameters
+	   :defpage
+	   :defsnippet
+	   :defstyle
+	   :link-to
+	   :redirect-to
+	   :stylesheet))
