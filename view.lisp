@@ -47,7 +47,7 @@
     (dolist (block css-blocks)
       (setf css-string (append css-string (list (format nil "~a{~%" (car block)))))
       (dolist (item (cdr block))
-	(setf css-string (append css-string (list (format nil "~a:~a;~%" (car item) (cadr item))))))
+	(setf css-string (append css-string (list (format nil "~t~a:~a;~%" (car item) (cadr item))))))
       (setf css-string (append css-string (list (format nil "}~%")))))
     (reduce #'(lambda (x y) (concatenate 'string x y)) css-string)))
     
