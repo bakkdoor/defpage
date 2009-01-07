@@ -56,15 +56,31 @@
 ;; creates & registers the appropriate handlers etc for hunchentoot
 ;; takes a name and a url to which the page maps
 ;; as well as the actual html-ouput in the body.
-(defmacro defpage ((name url) &body body)
+(defmacro defpage ((name url) (&rest args) &body body)
   (cl-utilities:once-only (url)
     `(setf (gethandler ',name)
-	   (make-instance 'defpage.server:handler
+	   (make-instance 'handler
 			  :url ,url
+			  :url-fun ,(if (not args)
+					`(lambda (handler &rest args)
+					   (url handler))
+					`(lambda (handler &optional &key ,@args)
+					   (format nil
+						   ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
+							    args)
+						   (url handler)
+						   ,@args)))
 			  :name ',name
-			  :handler (lambda()
-				     (with-page-output
-				       ,@body))))))
+			  :handler ,(if (not args)
+					`(lambda ()
+					   (with-page-output
+					     ,@body))
+					`(lambda ()
+					   (with-parameters (,@args)
+					     (with-page-output
+					       ,@body))))))))
+								    
+
 
 ;; define a css stylesheet
 ;; will be routed to url within /stylesheets/[name]
@@ -105,21 +121,27 @@
 
 ;; redirects to a given page name.
 ;; example: (redirect-to home-page)
-(defmacro redirect-to (page-name)
-  `(hunchentoot:redirect (page-url ',page-name)))
+(defmacro redirect-to (page-name &optional &rest page-arguments)
+  (if page-arguments
+      `(hunchentoot:redirect (command ',page-name ,@page-arguments))
+      `(hunchentoot:redirect (url ',page-name))))
     
 ;; takes the page-name (name defined within a defpage definition)
 ;; and an optional title (text displayed for the link) or takes
 ;; the page-name as the title, if title not given and returns the
 ;; html for a link to the page.
-(defmacro link-to (page-name &optional (title nil title-given-p))
-  `(cl-who:with-html-output (*+html-stream+*)
-     (cl-who:htm
-      ,(if (and title-given-p title)
-	   `(:a :href (page-url ',page-name) ,title)
-	   (let ((page-name-string (string-capitalize (string page-name))))
-	     `(:a :href (page-url ',page-name) ,page-name-string))))))
-
+(defmacro link-to (page-name &optional (title nil title-given-p) &rest page-arguments)
+  (let ((link-title (if (and title-given-p title)
+			title
+			(string-capitalize page-name))))
+    `(cl-who:with-html-output (*+html-stream+*)
+       (cl-who:htm
+	,(if page-arguments
+	     `(:a :href (command ',page-name ,@page-arguments)
+		  ,link-title)
+	     `(:a :href (url ',page-name)
+		  ,link-title))))))
+		    
 
 ;; helper-snippet to link to a stylesheet file
 (defsnippet stylesheet (name &optional (path "/stylesheets/"))

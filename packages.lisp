@@ -9,7 +9,8 @@
 	   :set-server-port
 	   :start-server
 	   :gethandler
-	   :page-url
+	   :url
+	   :command
 	   :with-parameters))
 
 
@@ -32,7 +33,8 @@
   (:use :common-lisp)
   (:export :empty-string
 	   :correct-url
-	   :string-begins-with))
+	   :string-begins-with
+	   :join-strings))
 
 
 (defpackage :defpage

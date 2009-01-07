@@ -17,3 +17,6 @@
 (defun string-begins-with (string begin-other)
   (unless (string= string begin-other)
     (> (string/= string begin-other) (- (length begin-other) 1))))
+
+(defun join-strings (string-list seperator)
+  (reduce #'(lambda (x y) (concatenate 'string x seperator y)) string-list))

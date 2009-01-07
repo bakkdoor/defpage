@@ -27,6 +27,10 @@
     :initarg :url
     :accessor url
     :type string)
+   (url-fun
+    :initarg :url-fun
+    :accessor url-fun
+    :type function)
    (handler
     :initarg :handler
     :accessor handler)
@@ -36,27 +40,35 @@
     :type symbol)))
 
 
-;; hash mit unseren handlern. 
-;; key: name des handlers bzw. der seite
+;; hash with our handlers. 
+;; key: name of the handler / name of the page
 ;; value: handler-objekt
 (defvar *handlers* (make-hash-table))
 
 
-;; hunchentoot-handler definieren
+;; now, we define our new dispatcher that uses the new data structure
 (defun our-handler (request)
-  (let ((handler (find (hunchentoot:script-name request)
-		       (arnesi:hash-table-values *handlers*)
-		       :key #'url :test #'equal))) 
+  (let ((handler (gethandler (hunchentoot:script-name request))))
     (when handler (handler handler))))
 
 
-;; hunchentoots dispatcher mit eigenem ersetzen
+;; exchange hunchentoots dispatcher with our own
 (setf hunchentoot:*dispatch-table* (list 'our-handler))
 
 
+(defun gethandlers ()
+  (arnesi:hash-table-values *handlers*))
+
+
 ;; returns the handler-object with a given name
-(defun gethandler (name)
+(defmethod gethandler ((name symbol))
   (gethash name *handlers*))
+
+
+(defmethod gethandler ((url string))
+  (find url
+	(gethandlers)
+	:key #'url :test #'equal))
 
 
 ;; setf-gethandler method
@@ -67,9 +79,14 @@
 
 ;; returns the url of a symbol, being the name of a page
 ;; defined via defpage
-(defmethod page-url ((name symbol))
+(defmethod url ((name symbol))
   (arnesi:awhen (gethandler name)
     (url arnesi:it)))
+
+
+(defmethod command ((name symbol) &rest args)
+  (arnesi:awhen (gethandler name)
+    (apply (url-fun arnesi:it) arnesi:it args)))
 
 
 (defmacro with-parameters ((&rest params) &body body)
