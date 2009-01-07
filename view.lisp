@@ -62,7 +62,7 @@
 	   (make-instance 'handler
 			  :url ,url
 			  :url-fun ,(if (not args)
-					`(lambda (handler &rest args)
+					`(lambda (handler)
 					   (url handler))
 					`(lambda (handler &optional &key ,@args)
 					   (format nil
