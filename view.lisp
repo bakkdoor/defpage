@@ -9,7 +9,7 @@
 
 ;; short-hand macro for cl-who:w-h-o-t-s
 (defmacro with-page-output (&body body)
-  `(cl-who:with-html-output-to-string (*+html-stream+*)
+  `(cl-who:with-html-output-to-string (*+html-stream+* nil :indent t)
      ,@body))
 
 
@@ -102,7 +102,7 @@
 ;; similar to for example 'partials' in ruby on rails. 
 (defmacro defsnippet (name args &body body)
   `(defun ,name ,args
-     (cl-who:with-html-output (*+html-stream+*)
+     (cl-who:with-html-output (*+html-stream+* nil :indent t)
        ,@body)))
 
 
