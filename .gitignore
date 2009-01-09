@@ -1,3 +1,4 @@
+*.dx64fsl
 *.fasl
 *.lisp~
 *.gitignore~

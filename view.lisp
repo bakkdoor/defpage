@@ -64,7 +64,7 @@
 			  :url-fun ,(if (not args)
 					`(lambda (handler)
 					   (url handler))
-					`(lambda (handler &optional &key ,@args)
+					`(lambda (handler &key ,@args)
 					   (format nil
 						   ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
 							    args)
