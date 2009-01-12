@@ -1,9 +1,11 @@
 (in-package :defpage.server)
 
 
-(defvar *server-port* 3000)
+(defvar *server-port* 3000
+  "The port on which the hunchentoot server is listening on.")
 
 (defun server-port ()
+  "Returns the the port on which hunchentoot listens on."
   *server-port*)
 
 (defun set-server-port (port)
@@ -17,6 +19,7 @@
 (defvar *server* nil)
 
 (defun start-server (&optional (port 3000))
+  "Starts the hunchentoot server on a given port."
   (set-server-port port)
   (setf *server* (hunchentoot:start-server :port *server-port*)))
 
