@@ -93,5 +93,8 @@
 
 
 (defmacro with-parameters ((&rest params) &body body)
-  `(let (,@(loop for p in params collecting `(,p (hunchentoot:parameter (string-downcase ',p)))))
+  `(let (,@(loop for p in params 
+	      collecting (if (equal (symbol-name p) (symbol-name :id))
+			     `(,p (s-utils:parse-integer-safely (hunchentoot:parameter (string-downcase ',p))))
+			     `(,p (hunchentoot:parameter (string-downcase ',p))))))
      ,@body))
