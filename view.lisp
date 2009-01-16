@@ -75,7 +75,7 @@
   Takes a name and a url (as string) to which the page will be mapped.
   The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax)."
   (unless url
-    (setf url (concatenate 'string "/" (string-downcase name))))
+    (setf url (concatenate 'string "/" (string-downcase name) "/")))
       (cl-utilities:once-only (url)
 	`(setf (gethandler ',name)
 	       (make-instance 'handler
