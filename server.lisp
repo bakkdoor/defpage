@@ -23,6 +23,11 @@
   (set-server-port port)
   (setf *server* (hunchentoot:start-server :port *server-port*)))
 
+
+(defun stop-server ()
+  (hunchentoot:stop-server *server*))
+
+
 (defun set-debug-mode (value)
   "Takes a boolean value and turns the debugging information display on or off, depending on value."
   (setf hunchentoot:*show-lisp-errors-p* value)

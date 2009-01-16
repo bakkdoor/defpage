@@ -15,6 +15,7 @@
 	   :server-port
 	   :set-server-port
 	   :start-server
+	   :stop-server
 	   :set-debug-mode
 	   :gethandler
 	   :url
