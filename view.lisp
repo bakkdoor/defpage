@@ -98,7 +98,6 @@
 					       ,@body))))))))
 								    
 
-
 ;; define a css stylesheet
 ;; will be routed to url within /stylesheets/[name]
 (defmacro defstyle ((name &optional (path "/stylesheets/")) &body body)
@@ -179,6 +178,6 @@
 		    
 
 ;; helper-snippet to link to a stylesheet file
+;; Creates a stylesheet-html-tag to a stylesheet defined with the given name.
 (defsnippet stylesheet (name &optional (path "/stylesheets/"))
-  "Creates a stylesheet-html-tag to a stylesheet defined with the given name."
   (:link :href (format nil "~a~a" path name) :rel "stylesheet" :type "text/css"))
