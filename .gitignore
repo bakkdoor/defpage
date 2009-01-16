@@ -3,3 +3,4 @@
 *.lisp~
 *.gitignore~
 load.lisp
+publish.sh
