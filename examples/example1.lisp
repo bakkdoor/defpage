@@ -9,13 +9,14 @@
   (body
    (background-color "#ccc")
    (color "#000")
-   (font-size "14"))
+   (font-size "15"))
   (a
    (text-decoration "none"))
   ("a:hover"
    (text-decoration "underline")))
 
-(defpage (show "/show") (message)
+;; leaving the optional url parameter will automatically bind the show-page to the url "/show".
+(defpage (show) (message) ;; page takes an optional parameter named 'message'. 
   (:html
    (:head
     (:title "defpage - show/print a message")
@@ -25,6 +26,7 @@
      (:h2 "Message is:")
      (:h1 (cl-who:str message))))))
 
+;; define another page, home, and bind it to the root url "/".
 (defpage (home "/") ()
   (:html
    (:head

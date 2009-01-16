@@ -69,33 +69,35 @@
 ;; creates & registers the appropriate handlers etc for hunchentoot
 ;; takes a name and a url to which the page maps
 ;; as well as the actual html-ouput in the body.
-(defmacro defpage ((name url) (&rest args) &body body)
+(defmacro defpage ((name &optional (url nil)) (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
   Takes a name and a url (as string) to which the page will be mapped.
   The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax)."
-  (cl-utilities:once-only (url)
-    `(setf (gethandler ',name)
-	   (make-instance 'handler
-			  :url ,url
-			  :url-fun ,(if (not args)
-					`(lambda (handler)
-					   (url handler))
-					`(lambda (handler &key ,@args)
-					   (format nil
-						   ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
-							    args)
-						   (url handler)
-						   ,@args)))
-			  :name ',name
-			  :handler ,(if (not args)
-					`(lambda ()
-					   (with-page-output
-					     ,@body))
-					`(lambda ()
-					   (with-parameters (,@args)
-					     (with-page-output
-					       ,@body))))))))
+  (unless url
+    (setf url (concatenate 'string "/" (string-downcase name))))
+      (cl-utilities:once-only (url)
+	`(setf (gethandler ',name)
+	       (make-instance 'handler
+			      :url ,url
+			      :url-fun ,(if (not args)
+					    `(lambda (handler)
+					       (url handler))
+					    `(lambda (handler &key ,@args)
+					       (format nil
+						       ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
+								args)
+						       (url handler)
+						       ,@args)))
+			      :name ',name
+			      :handler ,(if (not args)
+					    `(lambda ()
+					       (with-page-output
+						   ,@body))
+					    `(lambda ()
+					       (with-parameters (,@args)
+						 (with-page-output
+						     ,@body))))))))
 								    
 
 ;; define a css stylesheet
