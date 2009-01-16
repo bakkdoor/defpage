@@ -25,7 +25,9 @@
 
 
 (defun stop-server ()
-  (hunchentoot:stop-server *server*))
+  "Stops the hunchentoot server"
+  (hunchentoot:stop-server *server*)
+  (setf *server* nil))
 
 
 (defun set-debug-mode (value)
@@ -43,6 +45,10 @@
     :initarg :url-fun
     :accessor url-fun
     :type function)
+   (controller
+    :initarg :controller
+    :accessor controller
+    :type symbol)
    (handler
     :initarg :handler
     :accessor handler)

@@ -5,6 +5,13 @@
 (defvar *+html-stream+*)
 (declaim (special *+html-stream+*))
 
+;; dynamic variables for controller related stuff
+(defvar *+controller-name+* nil)
+(declaim (special *+controller-name+*))
+(defvar *+controller-url+* nil)
+(declaim (special *+controller-url+*))
+
+
 ;(defvar *layouts* (make-hash-table))
 
 ;; short-hand macro for cl-who:w-h-o-t-s
@@ -63,7 +70,15 @@
 	(setf css-string (append css-string (list (format nil "~t~a:~a;~%" (car item) (cadr item))))))
       (setf css-string (append css-string (list (format nil "}~%")))))
     (reduce #'(lambda (x y) (concatenate 'string x y)) css-string)))
-    
+
+
+(defmacro defcontroller ((name &optional (base-url nil)) &body body)
+  (unless base-url
+    (setf base-url (concatenate 'string "/" (string-downcase name))))
+  `(let ((*+controller-name+* ',name)
+	 (*+controller-url+* ,base-url))
+     ,@body))
+
       
 ;; macro to define a page.
 ;; creates & registers the appropriate handlers etc for hunchentoot
@@ -76,29 +91,37 @@
   The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax)."
   (unless url
     (setf url (concatenate 'string "/" (string-downcase name) "/")))
-      (cl-utilities:once-only (url)
-	`(setf (gethandler ',name)
-	       (make-instance 'handler
-			      :url ,url
-			      :url-fun ,(if (not args)
-					    `(lambda (handler)
-					       (url handler))
-					    `(lambda (handler &key ,@args)
-					       (format nil
-						       ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
-								args)
-						       (url handler)
-						       ,@args)))
-			      :name ',name
-			      :handler ,(if (not args)
-					    `(lambda ()
-					       (with-page-output
-						   ,@body))
-					    `(lambda ()
-					       (with-parameters (,@args)
+  (let ((url-var (gensym))) ;; this var will hold the actual url value
+    (cl-utilities:once-only (url)
+      `(progn
+	 (let ((,url-var ,url))
+	   ;; if inside a controller, add the controller-url in front of the handler's
+	   (if (and *+controller-url+* 
+		    (string/= *+controller-url+* "/"))
+	       (setf ,url-var (concatenate 'string *+controller-url+* ,url)))
+	   (setf (gethandler ',name)
+		 (make-instance 'handler
+				:controller *+controller-name+*
+				:url ,url-var
+				:url-fun ,(if (not args)
+					      `(lambda (handler)
+						 (url handler))
+					      `(lambda (handler &key ,@args)
+						 (format nil
+							 ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
+								  args)
+							 (url handler)
+							 ,@args)))
+				:name ',name
+				:handler ,(if (not args)
+					      `(lambda ()
 						 (with-page-output
-						     ,@body))))))))
-								    
+						   ,@body))
+					      `(lambda ()
+						 (with-parameters (,@args)
+						   (with-page-output
+						     ,@body)))))))))))
+
 
 ;; define a css stylesheet
 ;; will be routed to url within /stylesheets/[name]

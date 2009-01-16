@@ -22,6 +22,7 @@
 	   :command
 	   :page-url
 	   :with-parameters
+	   :defcontroller
 	   :defpage
 	   :defsnippet
 	   :defstyle
