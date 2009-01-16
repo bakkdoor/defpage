@@ -1,4 +1,4 @@
-(in-package :defpage.generic)
+(in-package :defpage.helpers)
 
 
 (defun empty-string (string)

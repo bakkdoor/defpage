@@ -13,5 +13,5 @@
   :depends-on (:hunchentoot :cl-who :s-utils :arnesi :cl-utilities)
   :components ((:file "packages")
                (:file "server")
-               (:file "generic")
+               (:file "helpers")
 	       (:file "view")))

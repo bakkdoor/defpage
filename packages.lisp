@@ -1,35 +1,6 @@
 (in-package :common-lisp-user)
 
-
-(defpackage :defpage.server
-  (:use :common-lisp)
-  (:export :handler
-	   :*handlers*
-	   :server-port
-	   :set-server-port
-	   :start-server
-	   :gethandler
-	   :url
-	   :command
-	   :with-parameters))
-
-
-(defpackage :defpage.view
-  (:use :common-lisp
-	:defpage.server)
-  (:export ;:*layouts*
-	   :defpage
-	   :defsnippet
-	   ;:deflayout
-	   :defstyle
-	   :with-page-output
-	   :with-css-output
-	   :link-to
-	   :redirect-to
-	   :stylesheet))
-
-
-(defpackage :defpage.generic
+(defpackage :defpage.helpers
   (:use :common-lisp)
   (:export :empty-string
 	   :correct-url
@@ -39,19 +10,22 @@
 
 (defpackage :defpage
   (:use :common-lisp
-	:defpage.server
-	:defpage.view
-	:defpage.generic)
+	:defpage.helpers)
   (:export :handler
 	   :server-port
 	   :set-server-port
 	   :start-server
+	   :set-debug-mode
 	   :gethandler
+	   :url
+	   :command
 	   :page-url
 	   :with-parameters
 	   :defpage
 	   :defsnippet
 	   :defstyle
+	   :with-page-output
+	   :with-css-output
 	   :link-to
 	   :redirect-to
 	   :stylesheet))

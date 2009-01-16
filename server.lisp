@@ -1,4 +1,4 @@
-(in-package :defpage.server)
+(in-package :defpage)
 
 
 (defvar *server-port* 3000
@@ -23,6 +23,10 @@
   (set-server-port port)
   (setf *server* (hunchentoot:start-server :port *server-port*)))
 
+(defun set-debug-mode (value)
+  "Takes a boolean value and turns the debugging information display on or off, depending on value."
+  (setf hunchentoot:*show-lisp-errors-p* value)
+  (setf hunchentoot:*show-lisp-backtraces-p* value))
 
 ;; url dispatchers
 (defclass handler ()

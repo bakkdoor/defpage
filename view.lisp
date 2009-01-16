@@ -1,4 +1,4 @@
-(in-package :defpage.view)
+(in-package :defpage)
 
 
 ;; dynamic variable for cl-who outputs stream
@@ -114,7 +114,7 @@
     (let ((url (concatenate 'string path (string-downcase (string name)))))
       (cl-utilities:once-only (url)
 	`(setf (gethandler ',name)
-	       (make-instance 'defpage.server:handler
+	       (make-instance 'handler
 			      :url ,url
 			      :name ',name
 			      :handler (lambda()
