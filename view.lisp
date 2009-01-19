@@ -5,14 +5,23 @@
 (defvar *+html-stream+*)
 (declaim (special *+html-stream+*))
 
-;; dynamic variables for controller related stuff
-(defvar *+controller-name+* nil)
-(declaim (special *+controller-name+*))
-(defvar *+controller-url+* nil)
-(declaim (special *+controller-url+*))
-
+;; dynamic variable for current module
+(defvar *+module+* nil)
+(declaim (special *+module+*))
 
 ;(defvar *layouts* (make-hash-table))
+
+
+(defclass module ()
+  ((name
+    :reader module-name
+    :initarg :name
+    :type symbol)
+   (url
+    :reader module-url
+    :initarg :url
+    :type string)))
+
 
 ;; short-hand macro for cl-who:w-h-o-t-s
 (defmacro with-page-output (&body body)
@@ -72,69 +81,77 @@
     (reduce #'(lambda (x y) (concatenate 'string x y)) css-string)))
 
 
-(defmacro defcontroller ((name &optional (base-url nil)) &body body)
-  (unless base-url
-    (setf base-url (concatenate 'string "/" (string-downcase name))))
-  `(let ((*+controller-name+* ',name)
-	 (*+controller-url+* ,base-url))
-     ,@body))
+(defmacro defmodule (name &body body)
+  (let ((base-url (concatenate 'string "/" (string-downcase name))))
+    (if (string= base-url "/root")
+	(setf base-url "/"))
+    `(let ((*+module+* (make-instance 'module :name ',name :url ,base-url)))
+       ,@body)))
 
       
 ;; macro to define a page.
 ;; creates & registers the appropriate handlers etc for hunchentoot
-;; takes a name and a url to which the page maps
-;; as well as the actual html-ouput in the body.
-(defmacro defpage ((name &optional (url nil)) (&rest args) &body body)
+;; takes a name and maps it to a url consisting of the name to which the page maps
+;; also takes a list of possible arguments to the page, as well as the actual html-ouput in the body.
+(defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
-  Takes a name and a url (as string) to which the page will be mapped.
-  The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax)."
-  (unless url
-    (setf url (concatenate 'string "/" (string-downcase name) "/")))
-  (let ((url-var (gensym))) ;; this var will hold the actual url value
-    (cl-utilities:once-only (url)
-      `(progn
-	 (let ((,url-var ,url))
-	   ;; if inside a controller, add the controller-url in front of the handler's
-	   (if (and *+controller-url+* 
-		    (string/= *+controller-url+* "/"))
-	       (setf ,url-var (concatenate 'string *+controller-url+* ,url)))
-	   (setf (gethandler ',name)
-		 (make-instance 'handler
-				:controller *+controller-name+*
-				:url ,url-var
-				:url-fun ,(if (not args)
-					      `(lambda (handler)
-						 (url handler))
-					      `(lambda (handler &key ,@args)
-						 (format nil
-							 ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
-								  args)
-							 (url handler)
-							 ,@args)))
-				:name ',name
-				:handler ,(if (not args)
-					      `(lambda ()
-						 (with-page-output
-						   ,@body))
-					      `(lambda ()
-						 (with-parameters (,@args)
+  Takes a name and maps it to a url consisting of the name to which the page will be mapped.
+  Also takes a list of possible arguments to the page.
+  The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax).
+  Pages named \"root\" or \"index\" will be mapped to this url: \"/\"."
+  (let ((url (concatenate 'string "/" (string-downcase name) "/")))
+    (if (or (string= url "/root/")
+	    (string= url "/index/"))
+	(setf url "/"))
+    (let ((url-var (gensym)) ;; this var will hold the actual url value
+	  (curr-module-name (gensym)))
+      (cl-utilities:once-only (url)
+	`(progn
+	   (let* ((,url-var ,url)
+		 (,curr-module-name (if *+module+*
+					(module-name *+module+*)
+					nil)))
+	     ;; if inside a module, add the module-url in front of the handler's
+	     (if (and *+module+* 
+		      (string/= (module-url *+module+*) "/"))
+		 (setf ,url-var (concatenate 'string (module-url *+module+*) ,url)))
+	     (sethandler ',name (,curr-module-name)
+		   (make-instance 'handler
+				  :module *+module+*
+				  :url ,url-var
+				  :url-fun ,(if (not args)
+						`(lambda (handler)
+						   (url handler))
+						`(lambda (handler &key ,@args)
+						   (format nil
+							   ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
+								    args)
+							   (url handler)
+							   ,@args)))
+				  :name ',name
+				  :handler ,(if (not args)
+						`(lambda ()
 						   (with-page-output
-						     ,@body)))))))))))
+						     ,@body))
+						`(lambda ()
+						   (with-parameters (,@args)
+						     (with-page-output
+						       ,@body))))))))))))
 
 
 ;; define a css stylesheet
 ;; will be routed to url within /stylesheets/[name]
-(defmacro defstyle ((name &optional (path "/stylesheets/")) &body body)
+(defmacro defstyle (name &body body)
   "Defines a css stylesheet.
   Takes the name for the stylesheet (e.g. \"layout.css\" and an optional 'path' under which the stylesheet will be put.
   If no path given, the stylesheet will be mapped to the standard stylesheets-path (/stylesheets/$name)
   The body contains the css-style definitions.
   Example:
-    (defstyle (layout.css)
+    (defstyle layout.css
       (body
         (color \"#fff\")))"
-  (unless (null path)
+  (let ((path "/stylesheets/"))
     (let ((url (concatenate 'string path (string-downcase (string name)))))
       (cl-utilities:once-only (url)
 	`(setf (gethandler ',name)
@@ -176,19 +193,19 @@
 
 ;; redirects to a given page name.
 ;; example: (redirect-to home-page)
-(defmacro redirect-to (page-name &optional &rest page-arguments)
+(defmacro redirect-to (page-name &optional module-name &rest page-arguments)
   "Lets hunchentoot redirect to a given page-name with optionally any amount of page-arguments.
   Example: (redirect-to home-page)
   (where home-page would be defined as a page via defpage)." 
   (if page-arguments
       `(hunchentoot:redirect (command ',page-name ,@page-arguments))
-      `(hunchentoot:redirect (url ',page-name))))
+      `(hunchentoot:redirect (page-url ',page-name ',module-name))))
     
 ;; takes the page-name (name defined within a defpage definition)
 ;; and an optional title (text displayed for the link) or takes
 ;; the page-name as the title, if title not given and returns the
 ;; html for a link to the page.
-(defmacro link-to (page-name &optional (title nil title-given-p) &rest page-arguments)
+(defmacro link-to (page-name (&optional (module nil)) &optional (title nil title-given-p) &rest page-arguments)
   "Creates a link to a given page-name (defined with defpage) with an optional title and any amount of page arguments."
   (let ((link-title (if (and title-given-p title)
 			title
@@ -196,9 +213,9 @@
     `(cl-who:with-html-output (*+html-stream+*)
        (cl-who:htm
 	,(if page-arguments
-	     `(:a :href (command ',page-name ,@page-arguments)
+	     `(:a :href (command ',page-name ',module ,@page-arguments)
 		  ,link-title)
-	     `(:a :href (url ',page-name)
+	     `(:a :href (page-url ',page-name ',module)
 		  ,link-title))))))
 		    
 

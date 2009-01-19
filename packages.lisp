@@ -22,7 +22,7 @@
 	   :command
 	   :page-url
 	   :with-parameters
-	   :defcontroller
+	   :defmodule
 	   :defpage
 	   :defsnippet
 	   :defstyle

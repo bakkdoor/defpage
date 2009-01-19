@@ -45,10 +45,10 @@
     :initarg :url-fun
     :accessor url-fun
     :type function)
-   (controller
-    :initarg :controller
-    :accessor controller
-    :type symbol)
+   (module
+    :initarg :module
+    :accessor module
+    :type module)
    (handler
     :initarg :handler
     :accessor handler)
@@ -61,7 +61,7 @@
 ;; hash with our handlers. 
 ;; key: name of the handler / name of the page
 ;; value: handler-objekt
-(defvar *handlers* (make-hash-table))
+(defvar *handlers* (make-hash-table :test #'equal))
 
 
 ;; now, we define our new dispatcher that uses the new data structure
@@ -78,32 +78,50 @@
   (arnesi:hash-table-values *handlers*))
 
 
+(defun module-page-name (module-name page-name)
+  (if module-name
+      (concatenate 'string (string module-name) "--" (string page-name))
+      (concatenate 'string "--" (string page-name))))
+
+
+(defmacro sethandler (page-name (&optional (module-name nil)) value)
+  `(setf (gethandler ,page-name ,module-name)
+	 ,value))
+
+
+(defgeneric gethandler (page-name &optional module-name))
+
+
 ;; returns the handler-object with a given name
-(defmethod gethandler ((name symbol))
-  (gethash name *handlers*))
+(defmethod gethandler ((page-name symbol) &optional (module-name nil))
+  (let ((name (module-page-name module-name page-name)))
+    (gethash name *handlers*)))
 
 
-(defmethod gethandler ((url string))
+(defmethod gethandler ((url string) &optional (module-name nil))
+  (if module-name
+      (setf url (concatenate 'string "/" (string-downcase module-name) url)))
   (find url
 	(gethandlers)
 	:key #'url :test #'equal))
 
 
 ;; setf-gethandler method
-;; gets called to associated a handler with a name
-(defun (setf gethandler) (handler name)
-  (setf (gethash name *handlers*) handler))
+;; gets called to associate a handler with a name
+(defun (setf gethandler) (handler page-name &optional (module-name nil))
+  (let ((name (module-page-name module-name page-name)))
+    (setf (gethash name *handlers*) handler)))
 
 
 ;; returns the url of a symbol, being the name of a page
 ;; defined via defpage
-(defmethod url ((name symbol))
-  (arnesi:awhen (gethandler name)
-    (url arnesi:it)))
+(defmethod page-url ((page-name symbol) &optional (module-name nil))
+  (arnesi:awhen (gethandler page-name module-name)
+      (url arnesi:it)))
 
 
-(defmethod command ((name symbol) &rest args)
-  (arnesi:awhen (gethandler name)
+(defmethod command ((page-name symbol) &optional (module-name nil) &rest args)
+  (arnesi:awhen (gethandler page-name module-name)
     (apply (url-fun arnesi:it) arnesi:it args)))
 
 
