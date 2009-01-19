@@ -193,14 +193,14 @@
 
 ;; redirects to a given page name.
 ;; example: (redirect-to home-page)
-(defmacro redirect-to (page-name &optional module-name &rest page-arguments)
+(defmacro redirect-to (page-name &optional (module-name nil) &rest page-arguments)
   "Lets hunchentoot redirect to a given page-name with optionally any amount of page-arguments.
   Example: (redirect-to home-page)
   (where home-page would be defined as a page via defpage)." 
   (if page-arguments
-      `(hunchentoot:redirect (command ',page-name ,@page-arguments))
+      `(hunchentoot:redirect (command ',page-name ',module-name ,@page-arguments))
       `(hunchentoot:redirect (page-url ',page-name ',module-name))))
-    
+
 ;; takes the page-name (name defined within a defpage definition)
 ;; and an optional title (text displayed for the link) or takes
 ;; the page-name as the title, if title not given and returns the
