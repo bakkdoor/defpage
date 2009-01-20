@@ -23,7 +23,6 @@
     :type string)))
 
 
-;; short-hand macro for cl-who:w-h-o-t-s
 (defmacro with-page-output (&body body)
   "Short-hand macro for cl-who:with-html-output-to-string.
   Is used within the defpage macro to define pages."
@@ -31,16 +30,12 @@
      ,@body))
 
 
-;; short-hand macro for using generate-css-from
-;; aroung the body of the macro.
 (defmacro with-css-output (&body css-definitions)
   "Short-hand macro for using generate-css-from.
   Is used within defstyle macro to define css styles."
   `(generate-css-from ',css-definitions))
 
 
-;; turns given element into a string.
-;; if given a list, turns each element of list into a string.
 (defun stringify (elem)
   "Turns given element into a string.
   If given element is a list, turns each element of list into a string."
@@ -53,16 +48,6 @@
      (cons (stringify (car elem)) (stringify (cdr elem))))))
 
 
-;; returns a css-string based upon a list of lists
-;; list should be created by using with-css output syntax.
-;; list is a list of lists, each list containing the css definitions for a certain css-class.
-;; example:
-;; (generate-css-from '(body (color "#fff") (background-color "#000")))
-;; will give you something like this:
-;; body{
-;;   color: #fff;
-;;   background-color: #000;
-;; }
 (defun generate-css-from (list)
   "Generates css declarations as a string based upon a list of lists which resemble the css code.
   Example: (generate-css-from '(body (color \"#fff\") (background-color \"#000\")))
@@ -82,6 +67,8 @@
 
 
 (defmacro defmodule (name &body body)
+  "Defines a new module, into which pages can be defined.
+  Creates a kind of 'folder' into which pages will be put."
   (let ((base-url (concatenate 'string "/" (string-downcase name))))
     (if (string= base-url "/root")
 	(setf base-url "/"))
@@ -89,10 +76,6 @@
        ,@body)))
 
       
-;; macro to define a page.
-;; creates & registers the appropriate handlers etc for hunchentoot
-;; takes a name and maps it to a url consisting of the name to which the page maps
-;; also takes a list of possible arguments to the page, as well as the actual html-ouput in the body.
 (defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
@@ -140,12 +123,11 @@
 						       ,@body))))))))))))
 
 
-;; define a css stylesheet
-;; will be routed to url within /stylesheets/[name]
+
 (defmacro defstyle (name &body body)
   "Defines a css stylesheet.
-  Takes the name for the stylesheet (e.g. \"layout.css\" and an optional 'path' under which the stylesheet will be put.
-  If no path given, the stylesheet will be mapped to the standard stylesheets-path (/stylesheets/$name)
+  Takes the name for the stylesheet (e.g. \"layout.css\".
+  The stylesheet will be mapped to the standard stylesheets-path, together with its name (/stylesheets/$name).
   The body contains the css-style definitions.
   Example:
     (defstyle layout.css
@@ -163,9 +145,6 @@
 					   ,@body))))))))
 
 
-;; similar to defpage, only that it doesn't define a new page
-;; but just a snippet / part of a webpage.
-;; similar to for example 'partials' in ruby on rails. 
 (defmacro defsnippet (name args &body body)
   "Defines a new html-snippet. Basically similar to the defpage macro, 
   but instead of defining a whole new page only a snippet (or 'partial') is defined.
@@ -191,8 +170,7 @@
 ;;	 (funcall ,layout-fn ,@args)))))
 
 
-;; redirects to a given page name.
-;; example: (redirect-to home-page)
+
 (defmacro redirect-to (page-name &optional (module-name nil) &rest page-arguments)
   "Lets hunchentoot redirect to a given page-name with optionally any amount of page-arguments.
   Example: (redirect-to home-page)

@@ -9,6 +9,7 @@
   *server-port*)
 
 (defun set-server-port (port)
+  "Sets the port on which hunchentoot will listen."
   (if (and port 
 	   (integerp port))
       (setf *server-port* port)
@@ -16,7 +17,8 @@
 
 
 ;; server variable
-(defvar *server* nil)
+(defvar *server* nil
+  "The server variable, holding the current running server instance of hunchentoot.")
 
 (defun start-server (&optional (port 3000))
   "Starts the hunchentoot server on a given port."
@@ -29,6 +31,10 @@
   (hunchentoot:stop-server *server*)
   (setf *server* nil))
 
+
+(defun server-running ()
+  "Returns T or NIL, indicating if the hunchentoot server is running or not."
+  (not (null *server*)))
 
 (defun set-debug-mode (value)
   "Takes a boolean value and turns the debugging information display on or off, depending on value."

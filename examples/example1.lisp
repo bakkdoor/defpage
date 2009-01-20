@@ -28,23 +28,6 @@
    (text-decoration "underline")))
 
 
-;; a little snippet, that displays the module-name of a given page-nam
-;; or a message, if the page is not in a module.
-(defsnippet current-module (page-name &optional (module-name nil))
-  (:h4 
-   (cl-who:str
-    (let* ((handler (defpage::gethandler module-name page-name))
-	   (module (if handler
-		       (defpage::module handler)
-		       nil))
-	   (module-name (if module
-			    (defpage::module-name module)
-			    nil)))
-       (if module-name
-	   (format nil "Current module is: ~a." module-name)
-	   "Page not in a module.")))))
-
-
 ;; let's define a module which will hold the homepage.
 ;; you could also put other top-level-pages here.  
 (defmodule root ;; will be bound to root url "/".
@@ -63,9 +46,7 @@
 	    (:p
 	     (:h4 (link-to show (other) "Link with a parameter" :message "Hello, world!")))
 	    (:p
-	     (:h4 (link-to test () "Test page - not within a module")))
-	    (:p
-	     (current-module 'root 'index)))))))
+	     (:h4 (link-to test () "Test page - not within a module"))))))))
 
 
 ;; another module, with a page called 'show'.
@@ -83,8 +64,7 @@
              (:h2 "Message is:")
        (:h1 (cl-who:str message))
        (:h3 (link-to index (root) "Go back to start page."))
-       (:br)
-       (current-module 'other 'show))))))
+       (:br))))))
 
 
 ;; notice, that we can also define pages outside of modules, if we want to:
@@ -96,11 +76,10 @@
    (:body
     (:h2 "This page is not within a module, but simply a standalone page. :)")
     (:h3
-     (link-to index (root) "Go back to start page.")
-     (current-module nil 'test)))))
+     (link-to index (root) "Go back to start page.")))))
 
 
 ;; now we can start the hunchentoot webserver on port 3000
-(unless defpage::*server*
+(unless (server-running)
   (start-server 3000)
   (set-debug-mode t)) ;; enable debugging
