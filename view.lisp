@@ -75,7 +75,7 @@
     `(let ((*+module+* (make-instance 'module :name ',name :url ,base-url)))
        ,@body)))
 
-      
+
 (defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
@@ -92,35 +92,35 @@
       (cl-utilities:once-only (url)
 	`(progn
 	   (let* ((,url-var ,url)
-		 (,curr-module-name (if *+module+*
-					(module-name *+module+*)
-					nil)))
+		  (,curr-module-name (if *+module+*
+					 (module-name *+module+*)
+					 nil)))
 	     ;; if inside a module, add the module-url in front of the handler's
 	     (if (and *+module+* 
 		      (string/= (module-url *+module+*) "/"))
 		 (setf ,url-var (concatenate 'string (module-url *+module+*) ,url)))
-	     (sethandler ',name (,curr-module-name)
-		   (make-instance 'handler
-				  :module *+module+*
-				  :url ,url-var
-				  :url-fun ,(if (not args)
-						`(lambda (handler)
-						   (url handler))
-						`(lambda (handler &key ,@args)
-						   (format nil
-							   ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
-								    args)
-							   (url handler)
-							   ,@args)))
-				  :name ',name
-				  :handler ,(if (not args)
-						`(lambda ()
-						   (with-page-output
-						     ,@body))
-						`(lambda ()
-						   (with-parameters (,@args)
-						     (with-page-output
-						       ,@body))))))))))))
+ 	     (sethandler ',name (,curr-module-name)
+			 (make-instance 'handler
+					:module *+module+*
+					:url ,url-var
+					:url-fun ,(if (not args)
+						      `(lambda (handler)
+							 (url handler))
+						      `(lambda (handler &key ,@args)
+							 (format nil
+								 ,(format nil "~~A?~{~(~A~)=~~A~^&~}"
+									  args)
+								 (url handler)
+								 ,@args)))
+					:name ',name
+					:handler ,(if (not args)
+						      `(lambda ()
+							 (with-page-output
+							     ,@body))
+						      `(lambda ()
+							 (with-parameters (,@args)
+							   (with-page-output
+							       ,@body))))))))))))
 
 
 
@@ -142,7 +142,7 @@
 			      :name ',name
 			      :handler (lambda()
 					 (with-css-output
-					   ,@body))))))))
+					     ,@body))))))))
 
 
 (defmacro defsnippet (name args &body body)
@@ -195,7 +195,7 @@
 		  ,link-title)
 	     `(:a :href (page-url ',page-name ',module)
 		  ,link-title))))))
-		    
+
 
 ;; helper-snippet to link to a stylesheet file
 ;; Creates a stylesheet-html-tag to a stylesheet defined with the given name.
