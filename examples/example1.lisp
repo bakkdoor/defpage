@@ -28,25 +28,31 @@
    (text-decoration "underline")))
 
 
+(defmacro with-std-template ((&key (title "defpage: example1") (stylesheets '("layout.css"))) &body body)
+  `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
+     (:html
+      (:head
+       (:title ,title)
+       ,@(loop for s in stylesheets collect `(stylesheet ,s))))
+     (:body
+      (:div :id "main"
+	    ,@body))))
+
 ;; let's define a module which will hold the homepage.
 ;; you could also put other top-level-pages here.  
 (defmodule root ;; will be bound to root url "/".
   ;; define index page, which will automatically be bound to the root url "/".
   (defpage index ()
-    (:html
-     (:head
-      (:title "defpage : example1")
-      (stylesheet "layout.css"))
-     (:body
-      (:div :id "main"
-	    (:p
-	     (:h3 "Welcome to the first example page, created with the defpage library!"))
-	    (:p
-	     (:h4 (link-to show (other) "Link without a parameter")))
-	    (:p
-	     (:h4 (link-to show (other) "Link with a parameter" :message "Hello, world!")))
-	    (:p
-	     (:h4 (link-to test () "Test page - not within a module"))))))))
+;    (with-std-template ()
+    (with-std-template ()
+      (:p
+       (:h3 "Welcome to the first example page, created with the defpage library!"))
+      (:p
+       (:h4 (link-to show (other) "Link without a parameter")))
+      (:p
+       (:h4 (link-to show (other) "Link with a parameter" :message "Hello, world!")))
+      (:p
+       (:h4 (link-to test () "Test page - not within a module"))))))
 
 
 ;; another module, with a page called 'show'.
@@ -55,28 +61,20 @@
 (defmodule other
   ;; leaving the optional url parameter will automatically bind the show-page to the url "/other/show/".
   (defpage show (message) ;; page takes an optional parameter named 'message'. 
-    (:html
-     (:head
-      (:title "defpage - show/print a message")
-      (stylesheet "layout.css"))
-     (:body
+    (with-std-template ()
       (:p
-             (:h2 "Message is:")
+       (:h2 "Message is:")
        (:h1 (cl-who:str message))
        (:h3 (link-to index (root) "Go back to start page."))
-       (:br))))))
+       (:br)))))
 
 
 ;; notice, that we can also define pages outside of modules, if we want to:
 (defpage test () ;; will be bound to the url "/test/"
-  (:html 
-   (:head
-    (:title "defpage : simple test page - not within a module")
-    (stylesheet "layout.css"))
-   (:body
+  (with-std-template (:title "defpage : simple test page - not within a module")
     (:h2 "This page is not within a module, but simply a standalone page. :)")
     (:h3
-     (link-to index (root) "Go back to start page.")))))
+     (link-to index (root) "Go back to start page."))))
 
 
 ;; now we can start the hunchentoot webserver on port 3000

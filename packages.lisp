@@ -28,6 +28,7 @@
 	   :defsnippet
 	   :defstyle
 	   :with-page-output
+	   :with-snippet-output
 	   :with-css-output
 	   :link-to
 	   :redirect-to

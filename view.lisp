@@ -9,9 +9,6 @@
 (defvar *+module+* nil)
 (declaim (special *+module+*))
 
-;(defvar *layouts* (make-hash-table))
-
-
 (defclass module ()
   ((name
     :reader module-name
@@ -123,7 +120,6 @@
 							       ,@body))))))))))))
 
 
-
 (defmacro defstyle (name &body body)
   "Defines a css stylesheet.
   Takes the name for the stylesheet (e.g. \"layout.css\".
@@ -142,7 +138,12 @@
 			      :name ',name
 			      :handler (lambda()
 					 (with-css-output
-					     ,@body))))))))
+					   ,@body))))))))
+
+
+(defmacro with-snipped-output (&body body)
+  `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
+     ,@body))
 
 
 (defmacro defsnippet (name args &body body)
@@ -153,7 +154,7 @@
              (:div :id \"post-title\"
                (:p (cl-who:str (title post)))))"
   `(defun ,name ,args
-     (cl-who:with-html-output (*+html-stream+* nil :indent t)
+     (with-snipped-output
        ,@body)))
 
 
