@@ -73,17 +73,6 @@
        ,@body)))      
  
 
-(defmacro with-std-template ((&key (title "defpage: example1") (stylesheets '("layout.css"))) &body body)
-  `(defpage:with-snippet-output
-     (:html
-      (:head
-       (:title ,title)
-       ,@(loop for s in stylesheets collect `(stylesheet ,s)))
-      (:body
-       (:div :id "main"
-	     ,@body)))))
-
-
 (defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
