@@ -29,21 +29,20 @@
 
 
 (defmacro with-std-template ((&key (title "defpage: example1") (stylesheets '("layout.css"))) &body body)
-  `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
+  `(defpage:with-snippet-output
      (:html
       (:head
        (:title ,title)
-       ,@(loop for s in stylesheets collect `(stylesheet ,s))))
-     (:body
-      (:div :id "main"
-	    ,@body))))
+       ,@(loop for s in stylesheets collect `(stylesheet ,s)))
+      (:body
+       (:div :id "main"
+	     ,@body)))))
 
 ;; let's define a module which will hold the homepage.
 ;; you could also put other top-level-pages here.  
 (defmodule root ;; will be bound to root url "/".
   ;; define index page, which will automatically be bound to the root url "/".
   (defpage index ()
-;    (with-std-template ()
     (with-std-template ()
       (:p
        (:h3 "Welcome to the first example page, created with the defpage library!"))
