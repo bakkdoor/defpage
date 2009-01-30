@@ -70,7 +70,18 @@
     (if (string= base-url "/root")
 	(setf base-url "/"))
     `(let ((*+module+* (make-instance 'module :name ',name :url ,base-url)))
-       ,@body)))
+       ,@body)))      
+ 
+
+(defmacro with-std-template ((&key (title "defpage: example1") (stylesheets '("layout.css"))) &body body)
+  `(defpage:with-snippet-output
+     (:html
+      (:head
+       (:title ,title)
+       ,@(loop for s in stylesheets collect `(stylesheet ,s)))
+      (:body
+       (:div :id "main"
+	     ,@body)))))
 
 
 (defmacro defpage (name (&rest args) &body body)
@@ -141,9 +152,10 @@
 					   ,@body))))))))
 
 
-(defmacro with-snipped-output (&body body)
+(defmacro with-snippet-output (&body body)
   `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
      ,@body))
+
 
 
 (defmacro defsnippet (name args &body body)
@@ -154,7 +166,7 @@
              (:div :id \"post-title\"
                (:p (cl-who:str (title post)))))"
   `(defun ,name ,args
-     (with-snipped-output
+     (cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
        ,@body)))
 
 
