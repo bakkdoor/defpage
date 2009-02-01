@@ -24,6 +24,7 @@
 	   :page-url
 	   :with-parameters
 	   :defmodule
+	   :deflayout
 	   :defpage
 	   :defsnippet
 	   :defstyle
