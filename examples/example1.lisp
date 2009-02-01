@@ -79,5 +79,5 @@
 
 ;; now we can start the hunchentoot webserver on port 3000
 (unless (server-running)
-  (start-server 3000)
+  (start-server :port 3000)
   (set-debug-mode t)) ;; enable debugging

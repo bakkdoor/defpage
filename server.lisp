@@ -20,10 +20,10 @@
 (defvar *server* nil
   "The server variable, holding the current running server instance of hunchentoot.")
 
-(defun start-server (&optional (port 3000))
+(defun start-server (&key (port 3000) (mod-lisp-p nil))
   "Starts the hunchentoot server on a given port."
   (set-server-port port)
-  (setf *server* (hunchentoot:start-server :port *server-port*)))
+  (setf *server* (hunchentoot:start-server :port *server-port* :mod-lisp-p mod-lisp-p)))
 
 
 (defun stop-server ()
