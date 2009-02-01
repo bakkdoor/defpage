@@ -104,7 +104,18 @@
   Also takes a list of possible arguments to the page.
   The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax).
   Pages named \"root\" or \"index\" will be mapped to this url: \"/\"."
-  (let ((url (concatenate 'string "/" (string-downcase name) "/")))
+  (let* ((url (concatenate 'string "/" (string-downcase name) "/"))
+	(request-method-specified (and (keywordp (first args))
+				      (or (equal (first args) :get)
+					  (equal (first args) :post))))
+	(request-method (if request-method-specified
+			   (first args)
+			   :get))) ;; default method is :get
+    
+    ;; if :post or :get specified, only take the rest as actual arguments
+    (if request-method-specified
+	(setf args (rest args)))
+				     
     (if (or (string= url "/root/")
 	    (string= url "/index/"))
 	(setf url "/"))
@@ -139,9 +150,26 @@
 							 (with-page-output
 							     ,@body))
 						      `(lambda ()
-							 (with-parameters (,@args)
-							   (with-page-output
-							       ,@body))))))))))))
+							 ;; if request-method-specified, current request-method
+							 ;; should match the specified one.
+							 ;; if not => bad-request page is shown.
+							 (if (and ,request-method-specified
+								  (not (equal (hunchentoot:request-method)
+									      ,request-method)))
+
+							     (bad-request)
+							     
+							     (with-parameters (,@args)
+							       (with-page-output
+								 ,@body)))))))))))))
+
+(defmacro bad-request ()
+  "Is used to display an error message, if a specified request-method isn't used with the current request."
+  `(with-page-output
+     (:html
+      (:head (:title "Bad page request!"))
+      (:body
+       (:h1 "Error. Bad page request.")))))
 
 
 (defmacro defstyle (name &body body)
