@@ -12,6 +12,8 @@
   (:use :common-lisp
 	:defpage.helpers)
   (:export :handler
+	   :*bad-request-handler*
+	   :bad-request
 	   :server-port
 	   :set-server-port
 	   :start-server

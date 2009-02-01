@@ -4,6 +4,9 @@
 (defvar *server-port* 3000
   "The port on which the hunchentoot server is listening on.")
 
+(defvar *bad-request-handler* nil
+  "The handler function that gets called, if a bad request occured.")
+
 (defun server-port ()
   "Returns the the port on which hunchentoot listens on."
   *server-port*)

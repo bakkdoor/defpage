@@ -96,7 +96,7 @@
      `(with-snippet-output
 	,,@body))))
 
-     
+
 (defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
@@ -162,14 +162,6 @@
 							     (with-parameters (,@args)
 							       (with-page-output
 								 ,@body)))))))))))))
-
-(defmacro bad-request ()
-  "Is used to display an error message, if a specified request-method isn't used with the current request."
-  `(with-page-output
-     (:html
-      (:head (:title "Bad page request!"))
-      (:body
-       (:h1 "Error. Bad page request.")))))
 
 
 (defmacro defstyle (name &body body)
@@ -242,3 +234,19 @@
 ;; Creates a stylesheet-html-tag to a stylesheet defined with the given name.
 (defsnippet stylesheet (name &optional (path "/stylesheets/"))
   (:link :href (format nil "~a~a" path name) :rel "stylesheet" :type "text/css"))
+
+
+(defun bad-request ()
+  "Function that calls the current bad-request handler."
+  (if *bad-request-handler*
+      (funcall *bad-request-handler*)
+      (default-bad-request-handler)))
+    
+
+(defun default-bad-request-handler ()
+  "Is used to display an error message, if a specified request-method isn't used with the current request."
+  (with-page-output
+    (:html
+     (:head (:title "Bad page request!"))
+     (:body
+      (:h1 "Error. Bad page request.")))))
