@@ -71,8 +71,32 @@
 	(setf base-url "/"))
     `(let ((*+module+* (make-instance 'module :name ',name :url ,base-url)))
        ,@body)))      
- 
 
+
+(defmacro deflayout (name (&rest args) &rest body)
+  "Creates a new layout-macro (named 'with-[name]-layout') which can be used as a template.
+  Basically works like a macro, but its body is wrapped within a (with-snippet-output) call.
+  Example:
+  (deflayout std ((&key (title \"defpage: example1\") (stylesheets '(\"layout.css\"))) &body content)	   
+  `(:html
+    (:head
+     (:title ,title)
+     ,@(loop for s in stylesheets collect `(stylesheet ,s)))
+    (:body
+     (:div :id \"main\"
+	   ,@content))))
+
+  => Will generate a 'with-std-layout' macro, which you call like this:
+  (defpage index ()
+    (with-std-layout (:title \"index page\")
+      (:h1 \"Inside of the template\")))"
+  
+  (let ((macro-name (intern (concatenate 'string "WITH-" (string name) "-LAYOUT"))))
+  `(defmacro ,macro-name ,args
+     `(with-snippet-output
+	,,@body))))
+
+     
 (defmacro defpage (name (&rest args) &body body)
   "Macro to define a page.
   Creates & registers the appropriate handlers for hunchentoot.
@@ -142,9 +166,9 @@
 
 
 (defmacro with-snippet-output (&body body)
+  "Wraps its body-forms into a call to (cl-who:with-html-output)."
   `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
      ,@body))
-
 
 
 (defmacro defsnippet (name args &body body)
@@ -159,20 +183,6 @@
        ,@body)))
 
 
-;;(defmacro deflayout (name args &body body)
-;;  (let ((arg-list (append (list (quote &key)) args))) 
-;;  `(setf (gethash ',name *layouts*) #'(lambda ,arg-list
-;;					(cl-who:with-html-output (*+html-stream+*)
-;;					  ,@body)))))
-
-;;(defmacro use-layout (layout-name args)
-;;  (let ((layout-fn (gensym)))  
-;;    `(let* ((,layout-fn (gethash ',layout-name *layouts*)))
-;;       (cl-who:with-html-output (*+html-stream+*)
-;;	 (funcall ,layout-fn ,@args)))))
-
-
-
 (defmacro redirect-to (page-name &optional (module-name nil) &rest page-arguments)
   "Lets hunchentoot redirect to a given page-name with optionally any amount of page-arguments.
   Example: (redirect-to home-page)
@@ -180,6 +190,7 @@
   (if page-arguments
       `(hunchentoot:redirect (command ',page-name ',module-name ,@page-arguments))
       `(hunchentoot:redirect (page-url ',page-name ',module-name))))
+
 
 ;; takes the page-name (name defined within a defpage definition)
 ;; and an optional title (text displayed for the link) or takes
