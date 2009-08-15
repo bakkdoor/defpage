@@ -23,15 +23,21 @@
 (defvar *server* nil
   "The server variable, holding the current running server instance of hunchentoot.")
 
+(defvar *acceptor* nil
+  "The acceptor variable")
+
 (defun start-server (&key (port 3000) (mod-lisp-p nil))
   "Starts the hunchentoot server on a given port."
   (set-server-port port)
-  (setf *server* (hunchentoot:start-server :port *server-port* :mod-lisp-p mod-lisp-p)))
+  (setf *acceptor* (make-instance 'hunchentoot:acceptor :port *server-port* ));:mod-lisp-p mod-lisp-p))
+  (setf *server* (hunchentoot:start *acceptor*)))
+  ;(setf *server* (hunchentoot:start-server :port *server-port* :mod-lisp-p mod-lisp-p)))
 
 
 (defun stop-server ()
   "Stops the hunchentoot server"
-  (hunchentoot:stop-server *server*)
+  ;(hunchentoot:stop-server *server*)
+  (hunchentoot:stop *acceptor*)
   (setf *server* nil))
 
 
@@ -41,8 +47,8 @@
 
 (defun set-debug-mode (value)
   "Takes a boolean value and turns the debugging information display on or off, depending on value."
-  (setf hunchentoot:*show-lisp-errors-p* value)
-  (setf hunchentoot:*show-lisp-backtraces-p* value))
+  (setf hunchentoot:*show-lisp-errors-p* value))
+;  (setf hunchentoot:*show-lisp-backtraces-p* value))
 
 ;; url dispatchers
 (defclass handler ()

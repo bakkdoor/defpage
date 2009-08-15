@@ -2,12 +2,10 @@
 
 
 ;; dynamic variable for cl-who outputs stream
-(defvar *+html-stream+*)
-(declaim (special *+html-stream+*))
+(defvar *html-stream*)
 
 ;; dynamic variable for current module
-(defvar *+module+* nil)
-(declaim (special *+module+*))
+(defvar *module* nil)
 
 (defclass module ()
   ((name
@@ -23,7 +21,7 @@
 (defmacro with-page-output (&body body)
   "Short-hand macro for cl-who:with-html-output-to-string.
   Is used within the defpage macro to define pages."
-  `(cl-who:with-html-output-to-string (*+html-stream+* nil :indent t)
+  `(cl-who:with-html-output-to-string (*html-stream* nil :indent t)
      ,@body))
 
 
@@ -69,7 +67,7 @@
   (let ((base-url (concatenate 'string "/" (string-downcase name))))
     (if (string= base-url "/root")
 	(setf base-url "/"))
-    `(let ((*+module+* (make-instance 'module :name ',name :url ,base-url)))
+    `(let ((*module* (make-instance 'module :name ',name :url ,base-url)))
        ,@body)))      
 
 
@@ -124,16 +122,16 @@
       (cl-utilities:once-only (url)
 	`(progn
 	   (let* ((,url-var ,url)
-		  (,curr-module-name (if *+module+*
-					 (module-name *+module+*)
+		  (,curr-module-name (if *module*
+					 (module-name *module*)
 					 nil)))
 	     ;; if inside a module, add the module-url in front of the handler's
-	     (if (and *+module+* 
-		      (string/= (module-url *+module+*) "/"))
-		 (setf ,url-var (concatenate 'string (module-url *+module+*) ,url)))
+	     (if (and *module*
+		      (string/= (module-url *module*) "/"))
+		 (setf ,url-var (concatenate 'string (module-url *module*) ,url)))
  	     (sethandler ',name (,curr-module-name)
 			 (make-instance 'handler
-					:module *+module+*
+					:module *module*
 					:url ,url-var
 					:url-fun ,(if (not args)
 						      `(lambda (handler)
@@ -153,15 +151,17 @@
 							 ;; if request-method-specified, current request-method
 							 ;; should match the specified one.
 							 ;; if not => bad-request page is shown.
-							 (if (and ,request-method-specified
-								  (not (equal (hunchentoot:request-method)
-									      ,request-method)))
-
-							     (bad-request)
+							 (if
+                                                          (and ,request-method-specified
+                                                               (not
+                                                                (equal
+                                                                 (hunchentoot:request-method hunchentoot:*request*)
+                                                                 ,request-method)))
+                                                          (bad-request)
 							     
-							     (with-parameters (,@args)
-							       (with-page-output
-								 ,@body)))))))))))))
+                                                          (with-parameters (,@args)
+                                                            (with-page-output
+                                                              ,@body)))))))))))))
 
 
 (defmacro defstyle (name &body body)
@@ -187,7 +187,7 @@
 
 (defmacro with-snippet-output (&body body)
   "Wraps its body-forms into a call to (cl-who:with-html-output)."
-  `(cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
+  `(cl-who:with-html-output (defpage::*html-stream* nil :indent t)
      ,@body))
 
 
@@ -199,7 +199,7 @@
              (:div :id \"post-title\"
                (:p (cl-who:str (title post)))))"
   `(defun ,name ,args
-     (cl-who:with-html-output (defpage::*+html-stream+* nil :indent t)
+     (cl-who:with-html-output (defpage::*html-stream* nil :indent t)
        ,@body)))
 
 
@@ -221,7 +221,7 @@
   (let ((link-title (if (and title-given-p title)
 			title
 			(string-capitalize page-name))))
-    `(cl-who:with-html-output (*+html-stream+*)
+    `(cl-who:with-html-output (*html-stream*)
        (cl-who:htm
 	,(if page-arguments
 	     `(:a :href (command ',page-name ',module ,@page-arguments)

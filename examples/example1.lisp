@@ -101,7 +101,6 @@
   (start-server :port 3000)
   (set-debug-mode t)) ;; enable debugging
 
-
 ;; we can also define our own custom bad-request-handler,
 ;; if we don't like the default one (i know, it's ugly!):
 (setf defpage:*bad-request-handler*
