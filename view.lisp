@@ -25,7 +25,7 @@
    Makes seperation of logic and view easier. Will look for a file named page-name.html"
   (let ((template-name (concatenate 'string (string-downcase page-name) ".html")))
     `(let ((*values* (list ,@values)))
-       (html-template:fill-and-print-template (pathname ,template-name) *values* :stream *html-output*))))
+       (html-template:fill-and-print-template (pathname ,template-name) *values* :stream *html-stream*))))
 
 
 (defmacro with-page-output (&body body)
