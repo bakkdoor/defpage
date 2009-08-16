@@ -30,9 +30,14 @@
 	   :defpage
 	   :defsnippet
 	   :defstyle
+           :with-template
 	   :with-page-output
 	   :with-snippet-output
 	   :with-css-output
 	   :link-to
 	   :redirect-to
-	   :stylesheet))
+	   :stylesheet
+           :ensure-request
+           :ensure-request-or
+           :ensure-post-request
+           :ensure-get-request))

@@ -31,12 +31,10 @@
   (set-server-port port)
   (setf *acceptor* (make-instance 'hunchentoot:acceptor :port *server-port* ));:mod-lisp-p mod-lisp-p))
   (setf *server* (hunchentoot:start *acceptor*)))
-  ;(setf *server* (hunchentoot:start-server :port *server-port* :mod-lisp-p mod-lisp-p)))
 
 
 (defun stop-server ()
   "Stops the hunchentoot server"
-  ;(hunchentoot:stop-server *server*)
   (hunchentoot:stop *acceptor*)
   (setf *server* nil))
 

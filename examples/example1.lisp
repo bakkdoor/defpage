@@ -88,12 +88,13 @@
     (:h3
      (link-to index (root) "Go back to start page."))))
 
-(defpage wrong-request (:post message)
-  (with-std-layout (:title "This won't work, if accessed via :get method.")
-    (:p
-     (:h3 (cl-who:str message))
-     (:h2 "If you see this, you did actually use the :post http-request-method to access this page.")
-     (:h3 (link-to index (root) "Go back to start page.")))))
+(defpage wrong-request (message)
+  (ensure-post-request
+   (with-std-layout (:title "This won't work, if accessed via :get method.")
+     (:p
+      (:h3 (cl-who:str message))
+      (:h2 "If you see this, you did actually use the :post http-request-method to access this page.")
+      (:h3 (link-to index (root) "Go back to start page."))))))
 
 
 ;; now we can start the hunchentoot webserver on port 3000
@@ -105,9 +106,8 @@
 ;; if we don't like the default one (i know, it's ugly!):
 (setf defpage:*bad-request-handler*
       #'(lambda ()
-	  (with-page-output
-	    (with-std-layout (:title "Bad page request.")
-	      (:div :style "text-align: center"
-		    (:h2
-		     "Bad page request. Something went wrong here.")
-		    (:h4 (link-to index (root) "Go back home")))))))
+          (with-std-layout (:title "Bad page request.")
+            (:div :style "text-align: center"
+                  (:h2
+                   "Bad page request. Something went wrong here.")
+                  (:h4 (link-to index (root) "Go back home"))))))

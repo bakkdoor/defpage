@@ -1,11 +1,13 @@
 (in-package :defpage)
 
-
 ;; dynamic variable for cl-who outputs stream
 (defvar *html-stream*)
 
 ;; dynamic variable for current module
 (defvar *module* nil)
+
+;; dynamic variable for current values for templates (is used)
+(defvar *values*)
 
 (defclass module ()
   ((name
@@ -16,6 +18,14 @@
     :reader module-url
     :initarg :url
     :type string)))
+
+
+(defmacro with-template (page-name (&rest values))
+  "Can be used when using a template file for the view part of this handler.
+   Makes seperation of logic and view easier. Will look for a file named page-name.html"
+  (let ((template-name (concatenate 'string (string-downcase page-name) ".html")))
+    `(let ((*values* (list ,@values)))
+       (html-template:fill-and-print-template (pathname ,template-name) *values* :stream *html-output*))))
 
 
 (defmacro with-page-output (&body body)
@@ -102,18 +112,7 @@
   Also takes a list of possible arguments to the page.
   The body contains the html-ouput which then will be displayed to the browser (uses cl-who's html-output syntax).
   Pages named \"root\" or \"index\" will be mapped to this url: \"/\"."
-  (let* ((url (concatenate 'string "/" (string-downcase name) "/"))
-	(request-method-specified (and (keywordp (first args))
-				      (or (equal (first args) :get)
-					  (equal (first args) :post))))
-	(request-method (if request-method-specified
-			   (first args)
-			   :get))) ;; default method is :get
-    
-    ;; if :post or :get specified, only take the rest as actual arguments
-    (if request-method-specified
-	(setf args (rest args)))
-				     
+  (let* ((url (concatenate 'string "/" (string-downcase name) "/")))
     (if (or (string= url "/root/")
 	    (string= url "/index/"))
 	(setf url "/"))
@@ -146,22 +145,11 @@
 					:handler ,(if (not args)
 						      `(lambda ()
 							 (with-page-output
-							     ,@body))
+                                                           ,@body))
 						      `(lambda ()
-							 ;; if request-method-specified, current request-method
-							 ;; should match the specified one.
-							 ;; if not => bad-request page is shown.
-							 (if
-                                                          (and ,request-method-specified
-                                                               (not
-                                                                (equal
-                                                                 (hunchentoot:request-method hunchentoot:*request*)
-                                                                 ,request-method)))
-                                                          (bad-request)
-							     
-                                                          (with-parameters (,@args)
-                                                            (with-page-output
-                                                              ,@body)))))))))))))
+                                                         (with-parameters (,@args)
+                                                           (with-page-output
+                                                             ,@body))))))))))))
 
 
 (defmacro defstyle (name &body body)
@@ -234,6 +222,28 @@
 ;; Creates a stylesheet-html-tag to a stylesheet defined with the given name.
 (defsnippet stylesheet (name &optional (path "/stylesheets/"))
   (:link :href (format nil "~a~a" path name) :rel "stylesheet" :type "text/css"))
+
+
+(defmacro ensure-request (request-method &body body)
+  `(ensure-request-or ,request-method
+                      ,@body
+                      (bad-request)))
+
+
+(defmacro ensure-request-or (request-method (&body valid-request-body) (&body invalid-request-body))
+  `(if (eq (hunchentoot:request-method*) ,request-method)
+       ,valid-request-body
+       ,invalid-request-body))
+
+
+(defmacro ensure-post-request (&body body)
+    `(ensure-request :post
+       ,@body))
+
+
+(defmacro ensure-get-request (&body body)
+    `(ensure-request :get
+       ,@body))
 
 
 (defun bad-request ()
