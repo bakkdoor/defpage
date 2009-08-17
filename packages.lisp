@@ -30,7 +30,7 @@
 	   :defpage
 	   :defsnippet
 	   :defstyle
-           :with-template
+           :use-template
 	   :with-page-output
 	   :with-snippet-output
 	   :with-css-output

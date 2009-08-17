@@ -19,14 +19,13 @@
     :initarg :url
     :type string)))
 
-
-(defmacro with-template (page-name (&rest values))
+(defun use-template (name &rest values)
   "Can be used when using a template file for the view part of this handler.
-   Makes seperation of logic and view easier. Will look for a file named page-name.html"
-  (let ((template-name (concatenate 'string (string-downcase page-name) ".html")))
-    `(let ((*values* (list ,@values)))
-       (html-template:fill-and-print-template (pathname ,template-name) *values* :stream *html-stream*))))
-
+   Makes seperation of logic and view easier. Will look for a file named name.html
+   and fill in the values."
+  (let ((*values* values)
+        (template-name (concatenate 'string (string-downcase name) ".html")))
+    (html-template:fill-and-print-template (pathname template-name) *values* :stream *html-stream*)))
 
 (defmacro with-page-output (&body body)
   "Short-hand macro for cl-who:with-html-output-to-string.
