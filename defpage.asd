@@ -10,8 +10,9 @@
   :licence "GNU GPL v3"
   :description "Web development with Common Lisp and hunchentoot."
   :long-description "defpage aims to be a small but useful web-development library (or even framework?) for Common Lisp  using the Hunchentoot webserver."
-  :depends-on (:hunchentoot :cl-who :s-utils :arnesi :cl-utilities :html-template)
+  :depends-on (:hunchentoot :cl-who :s-utils :arnesi :cl-utilities :html-template :elephant)
   :components ((:file "packages")
                (:file "server")
                (:file "helpers")
-	       (:file "view")))
+	       (:file "view")
+               (:file "model")))

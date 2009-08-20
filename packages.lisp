@@ -40,4 +40,7 @@
            :ensure-request
            :ensure-request-or
            :ensure-post-request
-           :ensure-get-request))
+           :ensure-get-request
+           :*model-db-path*
+           :set-db-store
+           :defmodel))
