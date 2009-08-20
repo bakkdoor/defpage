@@ -23,7 +23,7 @@
          (collection-name (intern (concatenate 'string "*" (string-upcase model-plural-name) "*")))
          (get-method-name (intern (concatenate 'string "GET-" (string-upcase model-name) "S"))))
     `(progn
-       (defpclass ,model-name ()
+       (elephant:defpclass ,model-name ()
          ,(mapcar (lambda (sd)
                     (let* ((slot-name (first sd))
                            (slot-modifiers (rest sd)))
@@ -32,9 +32,9 @@
                                     ,@slot-modifiers)))
                   slot-definitions))
        (defvar ,collection-name
-         (or (get-from-root ,model-plural-name)
-             (let ((data (make-pset)))
-               (add-to-root ,model-plural-name data)
+         (or (elephant:get-from-root ,model-plural-name)
+             (let ((data (elephant:make-pset)))
+               (elephant:add-to-root ,model-plural-name data)
                data)))
        (defun ,get-method-name ()
-         (pset-list ,collection-name)))))
+         (elephant:pset-list ,collection-name)))))
