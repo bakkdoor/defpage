@@ -6,8 +6,7 @@
    string to a database server")
 
 (defvar *elephant-store*
-  (elephant:open-store
-   `(elephant:open-store (:clsql (:sqlite3 ,(concatenate 'string *model-db-path* "defpage-model.db"))))))
+  `(elephant:open-store (:clsql (:sqlite3 ,(concatenate 'string *model-db-path* "defpage-model.db")))))
 
 (defun set-db-store (&key (db-type :sqlite3) (path nil))
   (unless path
