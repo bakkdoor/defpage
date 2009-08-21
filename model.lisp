@@ -37,4 +37,16 @@
                (elephant:add-to-root ,model-plural-name data)
                data)))
        (defun ,get-method-name ()
-         (elephant:pset-list ,collection-name)))))
+         (elephant:pset-list ,collection-name))
+       (create-add-method ,model-name ,collection-name ,slot-definitions))))
+
+
+(defmacro create-add-method (model-name collection-name slot-definitions)
+  (let* ((method-name (intern (concatenate 'string "ADD-" (string-upcase model-name))))
+         (slotnames (loop for s in slot-definitions collect (first s)))
+         (slot-keyword-value-pairs (loop for s in slotnames collect `(,(intern (string-upcase s) "KEYWORD") ,s)))
+         (slot-keyword-value-list (reduce (lambda (x y) (append y x)) slot-keyword-value-pairs)))
+    `(defun ,method-name (&key ,@(loop for s in slotnames collect `(,s NIL)))
+       (elephant:insert-item
+        (make-instance ',model-name ,@slot-keyword-value-list)
+        ,collection-name))))
