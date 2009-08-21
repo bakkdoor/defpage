@@ -5,9 +5,9 @@
   :serial t
   :name "defpage"
   :author "Christopher Bertels, Eric Normand"
-  :version "0.1"
+  :version "0.2"
   :maintainer "Christopher Bertels"
-  :licence "GNU GPL v3"
+  :licence "BSD style"
   :description "Web development with Common Lisp and hunchentoot."
   :long-description "defpage aims to be a small but useful web-development library (or even framework?) for Common Lisp  using the Hunchentoot webserver."
   :depends-on (:hunchentoot :cl-who :s-utils :arnesi :cl-utilities :html-template :elephant)
